@@ -156,7 +156,7 @@ def main():
     global janela1, janela2
 
     glutInit(sys.argv)
-    glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH)
+    glutInitDisplayMode(int(GLUT_RGBA) | int(GLUT_DEPTH))
 
     # Carrega os objetos antes de criar as janelas
     carregaObjetos()

@@ -1,7 +1,10 @@
-from OpenGL.GLUT import *
-from OpenGL.GLU import *
-from OpenGL.GL import *
-from Ponto import *
+import os
+from OpenGL.GL import (
+    glPushMatrix, glTranslatef, glRotatef, glColor3f, glPointSize,
+    glBegin, glEnd, glVertex, glLineWidth, glPopMatrix,
+    GL_POINTS, GL_LINE_LOOP, GL_TRIANGLE_FAN
+)
+from Ponto import Ponto
 '''Carrega modelos 3D do formato obj e os renderiza usando OpenGl de 3 formas:
 vértices, wireframe e sólido'''
 class Objeto3D:
@@ -14,30 +17,31 @@ class Objeto3D:
         pass
     #carrega um arquivo obj e extrai vértices e faces.
     def LoadFile(self, file:str):
-        f = open(file, "r")
+        # Procura o arquivo relativo ao diretório deste módulo
+        base_dir = os.path.dirname(__file__)
+        path = file if os.path.isabs(file) else os.path.join(base_dir, file)
+        with open(path, "r") as f:
+            for line in f:
+                values = line.split(' ')
+                # dividimos a linha por ' ' e usamos o primeiro elemento para saber que tipo de item temos
 
-        # leitor de .obj baseado na descrição em https://en.wikipedia.org/wiki/Wavefront_.obj_file    
-        for line in f:
-            values = line.split(' ')
-            # dividimos a linha por ' ' e usamos o primeiro elemento para saber que tipo de item temos
+                if values[0] == 'v': 
+                    # se a linha começa com v, é um vértice
+                    #converte os valores para inteiro, coordenadas (Ponto espera ints)
+                    self.vertices.append(Ponto(int(float(values[1])),
+                                               int(float(values[2])),
+                                               int(float(values[3]))))
 
-            if values[0] == 'v': 
-                # se a linha começa com v, é um vértice
-                #converte os valores para float , coordenadas
-                self.vertices.append(Ponto(float(values[1]),
-                                           float(values[2]),
-                                           float(values[3])))
-
-            if values[0] == 'f':
-                # se a linha começa com f, é uma face. 
-                self.faces.append([]) 
-                for fVertex in values[1:]:
-                    fInfo = fVertex.split('/')
-                    # dividimos cada elemento por '/'
-                    self.faces[-1].append(int(fInfo[0]) - 1) # primeiro elemento é índice do vértice da face
-                    # ignoramos textura e normal
+                if values[0] == 'f':
+                    # se a linha começa com f, é uma face. 
+                    self.faces.append([]) 
+                    for fVertex in values[1:]:
+                        fInfo = fVertex.split('/')
+                        # dividimos cada elemento por '/'
+                        self.faces[-1].append(int(fInfo[0]) - 1) # primeiro elemento é índice do vértice da face
+                        # ignoramos textura e normal
                 
-            # ignoramos outros tipos de items, no exercício não é necessário e vai só complicar mais
+        # arquivo fechado automaticamente pelo context manager
         pass
     #desenha somente as vértices do objeto    
     def DesenhaVertices(self):
