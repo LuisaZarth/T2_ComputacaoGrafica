@@ -1,1 +1,1 @@
-# T2_Computa-oGrafica
+# T2 Computacao Grafica
