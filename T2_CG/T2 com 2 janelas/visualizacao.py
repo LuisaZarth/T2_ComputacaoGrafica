@@ -100,7 +100,6 @@ def desenhaJanela1():
     morphing.objeto1.DesenhaWireframe()
     glutSwapBuffers()
 
-
 def desenhaJanela2():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glMatrixMode(GL_MODELVIEW)
@@ -108,7 +107,6 @@ def desenhaJanela2():
     morphing.objeto2.Desenha()
     morphing.objeto2.DesenhaWireframe()
     glutSwapBuffers()
-
 
 def desenhaJanelaMorph():
     global t_interpolacao
@@ -149,6 +147,18 @@ def desenhaJanelaMorph():
 
     glutSwapBuffers()
 
+# ------------------------------------------------------------
+# Redimensionamento das janelas
+# ------------------------------------------------------------
+def redimensionar(largura, altura):
+    if altura == 0:
+        altura = 1
+
+    glViewport(0, 0, largura, altura)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluPerspective(60, largura / altura, 0.01, 50)
+    glMatrixMode(GL_MODELVIEW)
 
 # ------------------------------------------------------------
 # Controles e animação
@@ -196,8 +206,9 @@ def inicializar_janelas():
     PosicUser()
     glutDisplayFunc(desenhaJanela1)
     glutKeyboardFunc(teclado)
+    glutReshapeFunc(redimensionar)  
 
-    # Janela 2
+    # Janela 2  
     glutInitWindowSize(400, 400)
     glutInitWindowPosition(500, 50)
     janela2 = glutCreateWindow(b'Objeto 2')
@@ -205,6 +216,7 @@ def inicializar_janelas():
     PosicUser()
     glutDisplayFunc(desenhaJanela2)
     glutKeyboardFunc(teclado)
+    glutReshapeFunc(redimensionar) 
 
     # Janela Morph
     glutInitWindowSize(400, 400)
@@ -215,5 +227,6 @@ def inicializar_janelas():
     glutDisplayFunc(desenhaJanelaMorph)
     glutKeyboardFunc(teclado)
     glutIdleFunc(idle)
+    glutReshapeFunc(redimensionar) 
 
     glutMainLoop()

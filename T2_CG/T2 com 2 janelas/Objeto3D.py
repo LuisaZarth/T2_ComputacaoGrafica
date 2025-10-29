@@ -28,9 +28,7 @@ class Objeto3D:
                 if values[0] == 'v': 
                     # se a linha começa com v, é um vértice
                     #converte os valores para inteiro, coordenadas (Ponto espera ints)
-                    self.vertices.append(Ponto(int(float(values[1])),
-                                               int(float(values[2])),
-                                               int(float(values[3]))))
+                    self.vertices.append(Ponto(float(values[1]), float(values[2]), float(values[3])))
 
                 if values[0] == 'f':
                     # se a linha começa com f, é uma face. 
