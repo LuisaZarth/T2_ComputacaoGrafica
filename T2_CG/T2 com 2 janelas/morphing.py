@@ -48,15 +48,25 @@ def calcularCentroideFace(objeto, face_indices):
 def associarFaces():
     global associacoes
     associacoes.clear()
+
+    f1 = len(objeto1.faces)
+    f2 = len(objeto2.faces)
+
     centroides_obj2 = [calcularCentroideFace(objeto2, f) for f in objeto2.faces]
 
+    # associa cada face do obj1 com a mais próxima do obj2
     for i, face1 in enumerate(objeto1.faces):
         c1 = calcularCentroideFace(objeto1, face1)
-        melhor_j = min(range(len(centroides_obj2)),
-                       key=lambda j: distancia3D(c1, centroides_obj2[j]))
+        melhor_j = min(range(f2), key=lambda j: distancia3D(c1, centroides_obj2[j]))
         associacoes.append((i, melhor_j))
 
-    print(f"Associadas {len(associacoes)} faces (obj1={len(objeto1.faces)}, obj2={len(objeto2.faces)})")
+    # se obj2 tiver mais faces, adiciona associações extras
+    if f2 > f1:
+        extras = f2 - f1
+        for j in range(extras):
+            associacoes.append((f1 - 1, j))  # usa última face de obj1 como base
+
+    print(f"Associadas {len(associacoes)} faces (obj1={f1}, obj2={f2})")
 
 def interpolarVertice(v1, v2, t):
     return Ponto(
