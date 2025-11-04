@@ -116,4 +116,3 @@ def HaInterseccao(k: Ponto, l: Ponto, m: Ponto, n: Ponto) -> bool:
     if not ret: return False #True se os segmentos se cruzam e False se não
 
     return s>=0.0 and s <=1.0 and t>=0.0 and t<=1.0
-

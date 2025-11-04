@@ -14,16 +14,14 @@ from random import randint as rand
 
 """ Classe Linha """
 class Linha:
-    def __init__(self, *args):
-        if len(args) == 2 and isinstance(args[0], Ponto) and isinstance(args[1], Ponto):
-            self.a, self.b = args[0], args[1]
-        elif len(args) == 6:
-            self.a = Ponto(args[0], args[1], args[2])
-            self.b = Ponto(args[3], args[4], args[5])
-        else:
-            self.a = Ponto(0, 0, 0)
-            self.b = Ponto(0, 0, 0)
-            
+    def __init__(self, a: Ponto, b: Ponto):
+        self.a = a
+        self.b = b
+    #cria dois objetos a partir das coordenadas fornecidas e armazena em self.a e self.b
+    def __init__(self, x1: float = 0, y1: float = 0, z1 : float = 0, x2: float = 0, y2: float = 0, z2: float = 0):
+        self.a = Ponto(x1, y1, z1) #coordenadas do primeiro ponto
+        self.b = Ponto(x2, y2, z2) #coordenadas do segundo ponto
+
     """ Desenha a linha na tela atual """
     def desenhaLinha(self):
         glBegin(GL_LINES) #linhas, pares de vértices
