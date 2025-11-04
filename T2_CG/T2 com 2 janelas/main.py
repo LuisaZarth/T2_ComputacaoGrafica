@@ -4,6 +4,7 @@ from OpenGL.GL import *
 from Objeto3D import *
 from MorphManager import MorphManager
 import sys
+import pygame
 
 # Variáveis globais
 objeto1 = None
@@ -35,12 +36,12 @@ def carregaObjetos():
     try:
         objeto1 = Objeto3D()
         if not objeto1.LoadFile('easy2.obj'):
-            print("ERRO: Não foi possível carregar Human_Head.obj")
+            print("ERRO: Não foi possível carregar easy2.obj")
             return False
-            
+
         objeto2 = Objeto3D()  
         if not objeto2.LoadFile('easy1.obj'):
-            print("ERRO: Não foi possível carregar boat.obj") 
+            print("ERRO: Não foi possível carregar easy1.obj") 
             return False
         
         print(f"Objeto 1: {objeto1.getNumVertices()} vértices, {objeto1.getNumFaces()} faces")
@@ -323,6 +324,20 @@ def main():
     print("  R - Rotacionar objeto")
     print("=" * 50)
 
+    try:
+        pygame.mixer.init()
+        pygame.mixer.music.load('beatles.mp3') # Use .mp3 ou .ogg
+        pygame.mixer.music.set_volume(0.5) # Volume de 0.0 a 1.0
+        
+        # O argumento '-1' significa "tocar em loop infinito"
+        pygame.mixer.music.play(-1) 
+        
+        print("Musica carregada. Iniciando animacao...")
+        
+    except Exception as e:
+        print(f"Nao foi possivel carregar a musica: {e}")
+        print("Continuando sem som.")
+    
     try:
         glutMainLoop()
     except SystemExit:
