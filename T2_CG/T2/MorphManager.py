@@ -13,7 +13,7 @@ class MorphManager:
         self.total_frames = 200  # Mais frames para animação mais suave
         self.executando = False
         self.velocidade = 1.0
-        
+
     def setObjetos(self, obj1: Objeto3D, obj2: Objeto3D):
         self.objeto1 = obj1
         self.objeto2 = obj2
