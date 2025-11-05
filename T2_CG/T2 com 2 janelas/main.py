@@ -212,9 +212,11 @@ def tecladoJanela3(key, x, y):
         # Espaço inicia/pausa morphing
         if morph_manager.executando:
             morph_manager.pararMorphing()
+            pygame.mixer.music.pause()
             print("Morphing pausado")
         else:
             morph_manager.iniciarMorphing()
+            pygame.mixer.music.unpause()
             print("Morphing iniciado")
     elif key == b'r' or key == b'R':
         # Rotacionar objeto em morphing
@@ -224,6 +226,7 @@ def tecladoJanela3(key, x, y):
         glutDestroyWindow(janela3)
         global morph_visible
         morph_visible = False
+        pygame.mixer.music.stop()
         return
     
     glutPostRedisplay()
@@ -331,13 +334,14 @@ def main():
         
         # O argumento '-1' significa "tocar em loop infinito"
         pygame.mixer.music.play(-1) 
+        pygame.mixer.music.pause()
         
         print("Musica carregada. Iniciando animacao...")
         
     except Exception as e:
         print(f"Nao foi possivel carregar a musica: {e}")
         print("Continuando sem som.")
-    
+
     try:
         glutMainLoop()
     except SystemExit:
