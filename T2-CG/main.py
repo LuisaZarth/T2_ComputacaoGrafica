@@ -45,13 +45,13 @@ def carregaObjetos():
             print("ERRO: Não foi possível carregar o objeto") 
             return False
         
-        print(f"Objeto 1: {objeto1.getNumVertices()} vértices, {objeto1.getNumFaces()} faces")
-        print(f"Objeto 2: {objeto2.getNumVertices()} vértices, {objeto2.getNumFaces()} faces")
+        #print(f"Objeto 1: {objeto1.getNumVertices()} vértices, {objeto1.getNumFaces()} faces")
+       # print(f"Objeto 2: {objeto2.getNumVertices()} vértices, {objeto2.getNumFaces()} faces")
         
         # Configurar morph manager
         morph_manager.setObjetos(objeto1, objeto2)
-        print(f"Mapeamento criado: {len(morph_manager.mapa_vertices_1_para_2)} vértices (1->2)")
-        print(f"Mapeamento criado: {len(morph_manager.mapa_vertices_2_para_1)} vértices (2->1)")
+       # print(f"Mapeamento criado: {len(morph_manager.mapa_vertices_1_para_2)} vértices (1->2)")
+       # print(f"Mapeamento criado: {len(morph_manager.mapa_vertices_2_para_1)} vértices (2->1)")
         
         # VERIFICAÇÃO CRÍTICA
         print("\n=== VERIFICAÇÃO DE INICIALIZAÇÃO ===")
@@ -158,10 +158,7 @@ def tecladoJanela1(key, x, y):
     """Função de teclado para a primeira janela"""
     global morph_visible
     
-    if key == b'r' or key == b'R':
-        if objeto1:
-            objeto1.rotation = (1, 0, 0, objeto1.rotation[3] + 2)
-    elif key == b'm' or key == b'M':
+    if key == b'm' or key == b'M':
         if not morph_visible:
             criarJanelaMorphing()
             morph_visible = True
@@ -194,10 +191,8 @@ def tecladoJanela2(key, x, y):
     """Função de teclado para a segunda janela"""
     global morph_visible
     
-    if key == b'r' or key == b'R':
-        if objeto2:
-            objeto2.rotation = (0, 1, 0, objeto2.rotation[3] + 2)
-    elif key == b'm' or key == b'M':
+
+    if key == b'm' or key == b'M':
         if not morph_visible:
             criarJanelaMorphing()
             morph_visible = True
@@ -247,19 +242,6 @@ def tecladoJanela3(key, x, y):
             rotacao_automatica_janela3 = False
             pygame.mixer.music.unpause()
             print("Morphing iniciado")
-    elif key == b'+' or key == b'=':
-        # Aumentar velocidade
-        morph_manager.setVelocidade(morph_manager.velocidade + 0.5)
-    elif key == b'-' or key == b'_':
-        # Diminuir velocidade
-        morph_manager.setVelocidade(morph_manager.velocidade - 0.5)
-    elif key == b'0':
-        # Resetar morphing
-        morph_manager.reiniciarMorphing()
-        pygame.mixer.music.stop()
-        pygame.mixer.music.play(-1)
-        pygame.mixer.music.pause()
-        print("Morphing resetado")
     elif key == 27:  # ESC
         glutDestroyWindow(janela3)
         global morph_visible
@@ -339,9 +321,6 @@ def criarJanelaMorphing():
     print("JANELA DE MORPHING CRIADA!")
     print("Comandos:")
     print("  ESPAÇO - Iniciar/Pausar morphing")
-    print("  + - Aumentar velocidade")
-    print("  - - Diminuir velocidade")
-    print("  0 - Resetar morphing")
     print("  ESC - Fechar janela")
     print("=" * 50)
     
