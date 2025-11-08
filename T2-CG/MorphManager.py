@@ -1,4 +1,4 @@
-# MorphManager.py - VERSÃO COM MORPHING MELHORADO
+# MorphManager.py 
 import math
 from Ponto import Ponto
 from Objeto3D import Objeto3D
@@ -15,7 +15,7 @@ class MorphManager:
         self.executando = False
         self.velocidade = 1.0
         self.modo_transicao = 1  # 0=obj1, 1=morph, 2=obj2
-        
+
     def setObjetos(self, obj1: Objeto3D, obj2: Objeto3D):
         self.objeto1 = obj1
         self.objeto2 = obj2
@@ -380,10 +380,10 @@ class MorphManager:
         self.atualizarMorph(progresso)
         
         # Debug a cada 5%
-        percentual_atual = int(progresso * 100)
-        percentual_anterior = int((self.frame_atual - self.velocidade) / self.total_frames * 100)
-        if percentual_atual // 5 != percentual_anterior // 5:
-            print(f">>> Morphing: {percentual_atual}%")
+       # percentual_atual = int(progresso * 100)
+       # percentual_anterior = int((self.frame_atual - self.velocidade) / self.total_frames * 100)
+       # if percentual_atual // 5 != percentual_anterior // 5:
+        #    print(f">>> Morphing: {percentual_atual}%")
         
         return True
         
@@ -398,16 +398,4 @@ class MorphManager:
         """Para a animação de morphing"""
         self.executando = False
         progresso_atual = (self.frame_atual / self.total_frames) * 100
-        print(f"\n>>> Morphing PAUSADO em {progresso_atual:.1f}%")
-
-    def setVelocidade(self, velocidade: float):
-        """Define a velocidade do morphing"""
-        self.velocidade = max(0.1, min(5.0, velocidade))
-        print(f">>> Velocidade: {self.velocidade}x")
-
-    def reiniciarMorphing(self):
-        """Reinicia o morphing do início"""
-        self.frame_atual = 0
-        self.inicializarObjetoMorph()
-        self.executando = True
-        print("\n>>> Morphing REINICIADO")
+        #print(f"\n>>> Morphing PAUSADO em {progresso_atual:.1f}%")
