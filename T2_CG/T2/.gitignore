@@ -1,0 +1,14 @@
+# Byte-code compilado do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ambientes virtuais
+venv/
+.venv/
+env/
+.env/
+
+# Arquivos de IDE (ex: VS Code)
+.vscode/
