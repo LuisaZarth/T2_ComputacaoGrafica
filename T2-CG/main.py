@@ -16,6 +16,7 @@ janela1 = None
 janela2 = None
 janela3 = None
 morph_visible = False
+rotacao_automatica_janela3 = False
 
 def init():
     """Inicializa as configurações comuns do OpenGL"""
@@ -233,6 +234,8 @@ def desenhaJanela3():
 
 def tecladoJanela3(key, x, y):
     """Função de teclado para a janela de morphing"""
+    global morph_visible, rotacao_automatica_janela3
+
     if key == b' ':
         # Espaço inicia/pausa morphing
         if morph_manager.executando:
@@ -241,12 +244,9 @@ def tecladoJanela3(key, x, y):
             print("Morphing pausado")
         else:
             morph_manager.iniciarMorphing()
+            rotacao_automatica_janela3 = False
             pygame.mixer.music.unpause()
             print("Morphing iniciado")
-    elif key == b'r' or key == b'R':
-        # Rotacionar objeto em morphing
-        if morph_manager.objetoMorph:
-            morph_manager.objetoMorph.rotation = (0, 1, 0, morph_manager.objetoMorph.rotation[3] + 2)
     elif key == b'+' or key == b'=':
         # Aumentar velocidade
         morph_manager.setVelocidade(morph_manager.velocidade + 0.5)
@@ -264,17 +264,39 @@ def tecladoJanela3(key, x, y):
         glutDestroyWindow(janela3)
         global morph_visible
         morph_visible = False
+        rotacao_automatica_janela3 = False
         pygame.mixer.music.stop()
         return
     
     glutPostRedisplay()
 
 def timerJanela3(valor):
-    """Timer para animação do morphing"""
+    """Timer para animação do morphing E rotação pós-conclusão"""
+    global rotacao_automatica_janela3 # <-- Permite alterar a flag
+    
+    # 1. CHECA SE O MORPHING ESTÁ RODANDO
     if morph_manager.executando:
-        if morph_manager.proximoFrame():
-            glutPostRedisplay()
-    glutTimerFunc(16, timerJanela3, 0)  # ~60 FPS
+        
+        # Tenta avançar o frame. 
+        # proximoFrame() retorna False quando o morphing TERMINA.
+        if not morph_manager.proximoFrame():
+            # O morphing acabou de terminar!
+            print("Morphing concluído. Iniciando rotação automática.")
+            rotacao_automatica_janela3 = True # ATIVA a flag de rotação
+        
+        # Manda redesenhar (enquanto o morphing acontece)
+        glutPostRedisplay()
+    
+    # 2. SE O MORPHING NÃO ESTÁ RODANDO, CHECA SE A ROTAÇÃO DEVE ESTAR
+    elif rotacao_automatica_janela3:
+        
+        # Sim! Rotaciona o objeto continuamente
+        if morph_manager.objetoMorph:
+            morph_manager.objetoMorph.rotation = (0, 1, 0, morph_manager.objetoMorph.rotation[3] + 2)
+            glutPostRedisplay() # Manda redesenhar (para mostrar a rotação)
+
+    # Chama o timer de novo para o próximo loop
+    glutTimerFunc(16, timerJanela3, 0)
 
 def redimensionaJanela3(largura, altura):
     """Manter aspect ratio 1:1"""
@@ -287,7 +309,7 @@ def redimensionaJanela3(largura, altura):
 
 def criarJanelaMorphing():
     """Cria a janela de morphing"""
-    global janela3
+    global janela3, morph_visible, rotacao_automatica_janela3
     
     if janela3 is not None:
         glutSetWindow(janela3)
@@ -307,7 +329,9 @@ def criarJanelaMorphing():
     # Inicializar OpenGL para esta janela
     init()
     PosicUser()
-    
+
+    rotacao_automatica_janela3 = False
+
     # Iniciar timer para animação
     glutTimerFunc(16, timerJanela3, 0)
     
@@ -315,7 +339,6 @@ def criarJanelaMorphing():
     print("JANELA DE MORPHING CRIADA!")
     print("Comandos:")
     print("  ESPAÇO - Iniciar/Pausar morphing")
-    print("  R - Rotacionar objeto")
     print("  + - Aumentar velocidade")
     print("  - - Diminuir velocidade")
     print("  0 - Resetar morphing")
@@ -363,9 +386,8 @@ def main():
     print("=" * 50)
     print("SISTEMA DE MORPHING 3D INICIADO")
     print("Janelas 1 e 2 criadas")
-    print("Comandos:")
+    print("Comando:")
     print("  M - Abrir janela de morphing")
-    print("  R - Rotacionar objeto")
     print("=" * 50)
 
     try:
