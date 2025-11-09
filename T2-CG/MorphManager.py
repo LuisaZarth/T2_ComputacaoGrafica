@@ -20,22 +20,22 @@ class MorphManager:
         self.objeto1 = obj1
         self.objeto2 = obj2
         print("\n=== INICIANDO CONFIGURAÇÃO DE MORPHING ===")
-        print("Normalizando objetos...")
+        #print("Normalizando objetos...")
         self.normalizarObjetos()
-        print("Criando mapeamento bidirecional...")
+        #print("Criando mapeamento bidirecional...")
         self.criarMapeamentoBidirecional()
-        print("Inicializando objeto de morphing...")
+        #print("Inicializando objeto de morphing...")
         self.inicializarObjetoMorph()
-        print("=== CONFIGURAÇÃO COMPLETA ===\n")
+        #print("=== CONFIGURAÇÃO COMPLETA ===\n")
         
     def normalizarObjetos(self):
         """Normaliza a escala e centraliza os objetos"""
         if self.objeto1:
             self.normalizarObjeto(self.objeto1)
-            print(f"  Obj1 normalizado: {len(self.objeto1.vertices)} vértices")
+            #print(f"  Obj1: {len(self.objeto1.vertices)} vértices")
         if self.objeto2:
             self.normalizarObjeto(self.objeto2)
-            print(f"  Obj2 normalizado: {len(self.objeto2.vertices)} vértices")
+            #print(f"  Obj2: {len(self.objeto2.vertices)} vértices")
         
     def normalizarObjeto(self, obj: Objeto3D):
         """Normaliza um objeto individual para o cubo [-1, 1]"""
@@ -102,19 +102,19 @@ class MorphManager:
         if not self.objeto1 or not self.objeto2:
             return
         
-        print(f"  Criando mapa obj1 -> obj2...")
+        #print(f"  Criando mapa obj1 -> obj2...")
         # Mapear obj1 -> obj2 (cada vértice do obj1 para 3 mais próximos do obj2)
         for i, v1 in enumerate(self.objeto1.vertices):
             vizinhos = self.encontrarKVizinhosProximos(v1, self.objeto2.vertices, k=5)
             self.mapa_vertices_1_para_2[i] = vizinhos
         
-        print(f"  Criando mapa obj2 -> obj1...")
+        #print(f"  Criando mapa obj2 -> obj1...")
         # Mapear obj2 -> obj1 (cada vértice do obj2 para 3 mais próximos do obj1)
         for i, v2 in enumerate(self.objeto2.vertices):
             vizinhos = self.encontrarKVizinhosProximos(v2, self.objeto1.vertices, k=5)
             self.mapa_vertices_2_para_1[i] = vizinhos
         
-        print(f"  Mapeamento bidirecional criado")
+        #print(f"  Mapeamento bidirecional criado")
                     
     def inicializarObjetoMorph(self):
         """
@@ -139,7 +139,7 @@ class MorphManager:
         self.objetoMorph.position = Ponto(0, 0, 0)
         self.objetoMorph.rotation = (0, 1, 0, 0)
         
-        print(f"  Objeto morph: {len(self.objetoMorph.vertices)} vértices, {len(self.objetoMorph.faces)} faces")
+        #print(f"  Objeto morph: {len(self.objetoMorph.vertices)} vértices, {len(self.objetoMorph.faces)} faces")
         
     def interpolarComPesos(self, vizinhos, lista_vertices):
         """
@@ -373,7 +373,7 @@ class MorphManager:
             self.frame_atual = self.total_frames
             self.executando = False
             self.atualizarMorph(1.0)
-            print(">>> Morphing COMPLETO (100%)")
+            #print(">>> Morphing COMPLETO (100%)")
             return False
             
         progresso = self.frame_atual / self.total_frames
@@ -392,7 +392,7 @@ class MorphManager:
         self.executando = True
         self.frame_atual = 0
         self.inicializarObjetoMorph()
-        print("\n>>> Morphing INICIADO (0%)")
+        #print("\n>>> Morphing INICIADO (0%)")
         
     def pararMorphing(self):
         """Para a animação de morphing"""
