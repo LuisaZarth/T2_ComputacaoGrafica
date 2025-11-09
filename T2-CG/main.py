@@ -62,13 +62,13 @@ def carregaObjetos():
         # Verificar se o objeto morph começa igual ao objeto1
         v1_primeiro = objeto1.vertices[0]
         v_morph_primeiro = morph_manager.objetoMorph.vertices[0]
-        print(f"Primeiro vértice Obj1: ({v1_primeiro.x:.3f}, {v1_primeiro.y:.3f}, {v1_primeiro.z:.3f})")
-        print(f"Primeiro vértice ObjMorph: ({v_morph_primeiro.x:.3f}, {v_morph_primeiro.y:.3f}, {v_morph_primeiro.z:.3f})")
+        #print(f"Primeiro vértice Obj1: ({v1_primeiro.x:.3f}, {v1_primeiro.y:.3f}, {v1_primeiro.z:.3f})")
+        #print(f"Primeiro vértice ObjMorph: ({v_morph_primeiro.x:.3f}, {v_morph_primeiro.y:.3f}, {v_morph_primeiro.z:.3f})")
         
         # Verificar um exemplo de mapeamento
         exemplo_viz = morph_manager.mapa_vertices_1_para_2[0]
-        print(f"Vértice 0 mapeia para {len(exemplo_viz)} vizinhos: {[idx for idx, dist in exemplo_viz[:3]]}")
-        print("===================================\n")
+        #print(f"Vértice 0 mapeia para {len(exemplo_viz)} vizinhos: {[idx for idx, dist in exemplo_viz[:3]]}")
+        #print("===================================\n")
         
         return True
         
@@ -242,12 +242,7 @@ def tecladoJanela3(key, x, y):
             rotacao_automatica_janela3 = False
             pygame.mixer.music.unpause()
             print("Morphing iniciado")
-    elif key == 27:  # ESC
-        glutDestroyWindow(janela3)
-        global morph_visible
-        morph_visible = False
-        rotacao_automatica_janela3 = False
-        pygame.mixer.music.stop()
+    
         return
     
     glutPostRedisplay()
@@ -317,11 +312,10 @@ def criarJanelaMorphing():
     # Iniciar timer para animação
     glutTimerFunc(16, timerJanela3, 0)
     
-    print("=" * 50)
+    #print("=" * 50)
     print("JANELA DE MORPHING CRIADA!")
     print("Comandos:")
     print("  ESPAÇO - Iniciar/Pausar morphing")
-    print("  ESC - Fechar janela")
     print("=" * 50)
     
     # Forçar primeiro redesenho
@@ -378,7 +372,7 @@ def main():
         pygame.mixer.music.play(-1) 
         pygame.mixer.music.pause()
         
-        print("Música carregada com sucesso!")
+        #print("Música carregada com sucesso!")
         
     except Exception as e:
         print(f"Não foi possível carregar a música: {e}")
