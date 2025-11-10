@@ -45,7 +45,7 @@ class Objeto3D:
                         self.faces.append(face_vertices)
                 
             f.close()
-            print(f"Arquivo {file} carregado: {len(self.vertices)} vértices, {len(self.faces)} faces")
+            #print(f"Arquivo {file} carregado: {len(self.vertices)} vértices, {len(self.faces)} faces")
             return True
         
         except Exception as e:

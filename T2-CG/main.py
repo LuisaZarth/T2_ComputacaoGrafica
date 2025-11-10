@@ -16,6 +16,7 @@ janela1 = None
 janela2 = None
 janela3 = None
 morph_visible = False
+rotacao_automatica_janela3 = False
 
 def init():
     """Inicializa as configurações comuns do OpenGL"""
@@ -44,13 +45,13 @@ def carregaObjetos():
             print("ERRO: Não foi possível carregar o objeto") 
             return False
         
-        print(f"Objeto 1: {objeto1.getNumVertices()} vértices, {objeto1.getNumFaces()} faces")
-        print(f"Objeto 2: {objeto2.getNumVertices()} vértices, {objeto2.getNumFaces()} faces")
+        #print(f"Objeto 1: {objeto1.getNumVertices()} vértices, {objeto1.getNumFaces()} faces")
+       # print(f"Objeto 2: {objeto2.getNumVertices()} vértices, {objeto2.getNumFaces()} faces")
         
         # Configurar morph manager
         morph_manager.setObjetos(objeto1, objeto2)
-        print(f"Mapeamento criado: {len(morph_manager.mapa_vertices_1_para_2)} vértices (1->2)")
-        print(f"Mapeamento criado: {len(morph_manager.mapa_vertices_2_para_1)} vértices (2->1)")
+       # print(f"Mapeamento criado: {len(morph_manager.mapa_vertices_1_para_2)} vértices (1->2)")
+       # print(f"Mapeamento criado: {len(morph_manager.mapa_vertices_2_para_1)} vértices (2->1)")
         
         # VERIFICAÇÃO CRÍTICA
         print("\n=== VERIFICAÇÃO DE INICIALIZAÇÃO ===")
@@ -61,13 +62,13 @@ def carregaObjetos():
         # Verificar se o objeto morph começa igual ao objeto1
         v1_primeiro = objeto1.vertices[0]
         v_morph_primeiro = morph_manager.objetoMorph.vertices[0]
-        print(f"Primeiro vértice Obj1: ({v1_primeiro.x:.3f}, {v1_primeiro.y:.3f}, {v1_primeiro.z:.3f})")
-        print(f"Primeiro vértice ObjMorph: ({v_morph_primeiro.x:.3f}, {v_morph_primeiro.y:.3f}, {v_morph_primeiro.z:.3f})")
+        #print(f"Primeiro vértice Obj1: ({v1_primeiro.x:.3f}, {v1_primeiro.y:.3f}, {v1_primeiro.z:.3f})")
+        #print(f"Primeiro vértice ObjMorph: ({v_morph_primeiro.x:.3f}, {v_morph_primeiro.y:.3f}, {v_morph_primeiro.z:.3f})")
         
         # Verificar um exemplo de mapeamento
         exemplo_viz = morph_manager.mapa_vertices_1_para_2[0]
-        print(f"Vértice 0 mapeia para {len(exemplo_viz)} vizinhos: {[idx for idx, dist in exemplo_viz[:3]]}")
-        print("===================================\n")
+        #print(f"Vértice 0 mapeia para {len(exemplo_viz)} vizinhos: {[idx for idx, dist in exemplo_viz[:3]]}")
+        #print("===================================\n")
         
         return True
         
@@ -157,10 +158,7 @@ def tecladoJanela1(key, x, y):
     """Função de teclado para a primeira janela"""
     global morph_visible
     
-    if key == b'r' or key == b'R':
-        if objeto1:
-            objeto1.rotation = (1, 0, 0, objeto1.rotation[3] + 2)
-    elif key == b'm' or key == b'M':
+    if key == b'm' or key == b'M':
         if not morph_visible:
             criarJanelaMorphing()
             morph_visible = True
@@ -193,10 +191,8 @@ def tecladoJanela2(key, x, y):
     """Função de teclado para a segunda janela"""
     global morph_visible
     
-    if key == b'r' or key == b'R':
-        if objeto2:
-            objeto2.rotation = (0, 1, 0, objeto2.rotation[3] + 2)
-    elif key == b'm' or key == b'M':
+
+    if key == b'm' or key == b'M':
         if not morph_visible:
             criarJanelaMorphing()
             morph_visible = True
@@ -233,6 +229,8 @@ def desenhaJanela3():
 
 def tecladoJanela3(key, x, y):
     """Função de teclado para a janela de morphing"""
+    global morph_visible, rotacao_automatica_janela3
+
     if key == b' ':
         # Espaço inicia/pausa morphing
         if morph_manager.executando:
@@ -241,40 +239,41 @@ def tecladoJanela3(key, x, y):
             print("Morphing pausado")
         else:
             morph_manager.iniciarMorphing()
+            rotacao_automatica_janela3 = False
             pygame.mixer.music.unpause()
             print("Morphing iniciado")
-    elif key == b'r' or key == b'R':
-        # Rotacionar objeto em morphing
-        if morph_manager.objetoMorph:
-            morph_manager.objetoMorph.rotation = (0, 1, 0, morph_manager.objetoMorph.rotation[3] + 2)
-    elif key == b'+' or key == b'=':
-        # Aumentar velocidade
-        morph_manager.setVelocidade(morph_manager.velocidade + 0.5)
-    elif key == b'-' or key == b'_':
-        # Diminuir velocidade
-        morph_manager.setVelocidade(morph_manager.velocidade - 0.5)
-    elif key == b'0':
-        # Resetar morphing
-        morph_manager.reiniciarMorphing()
-        pygame.mixer.music.stop()
-        pygame.mixer.music.play(-1)
-        pygame.mixer.music.pause()
-        print("Morphing resetado")
-    elif key == 27:  # ESC
-        glutDestroyWindow(janela3)
-        global morph_visible
-        morph_visible = False
-        pygame.mixer.music.stop()
+    
         return
     
     glutPostRedisplay()
 
 def timerJanela3(valor):
-    """Timer para animação do morphing"""
+    """Timer para animação do morphing E rotação pós-conclusão"""
+    global rotacao_automatica_janela3 # <-- Permite alterar a flag
+    
+    # 1. CHECA SE O MORPHING ESTÁ RODANDO
     if morph_manager.executando:
-        if morph_manager.proximoFrame():
-            glutPostRedisplay()
-    glutTimerFunc(16, timerJanela3, 0)  # ~60 FPS
+        
+        # Tenta avançar o frame. 
+        # proximoFrame() retorna False quando o morphing TERMINA.
+        if not morph_manager.proximoFrame():
+            # O morphing acabou de terminar!
+            print("Morphing concluído. Iniciando rotação automática.")
+            rotacao_automatica_janela3 = True # ATIVA a flag de rotação
+        
+        # Manda redesenhar (enquanto o morphing acontece)
+        glutPostRedisplay()
+    
+    # 2. SE O MORPHING NÃO ESTÁ RODANDO, CHECA SE A ROTAÇÃO DEVE ESTAR
+    elif rotacao_automatica_janela3:
+        
+        # Sim! Rotaciona o objeto continuamente
+        if morph_manager.objetoMorph:
+            morph_manager.objetoMorph.rotation = (0, 1, 0, morph_manager.objetoMorph.rotation[3] + 2)
+            glutPostRedisplay() # Manda redesenhar (para mostrar a rotação)
+
+    # Chama o timer de novo para o próximo loop
+    glutTimerFunc(16, timerJanela3, 0)
 
 def redimensionaJanela3(largura, altura):
     """Manter aspect ratio 1:1"""
@@ -287,7 +286,7 @@ def redimensionaJanela3(largura, altura):
 
 def criarJanelaMorphing():
     """Cria a janela de morphing"""
-    global janela3
+    global janela3, morph_visible, rotacao_automatica_janela3
     
     if janela3 is not None:
         glutSetWindow(janela3)
@@ -307,19 +306,16 @@ def criarJanelaMorphing():
     # Inicializar OpenGL para esta janela
     init()
     PosicUser()
-    
+
+    rotacao_automatica_janela3 = False
+
     # Iniciar timer para animação
     glutTimerFunc(16, timerJanela3, 0)
     
-    print("=" * 50)
+    #print("=" * 50)
     print("JANELA DE MORPHING CRIADA!")
     print("Comandos:")
     print("  ESPAÇO - Iniciar/Pausar morphing")
-    print("  R - Rotacionar objeto")
-    print("  + - Aumentar velocidade")
-    print("  - - Diminuir velocidade")
-    print("  0 - Resetar morphing")
-    print("  ESC - Fechar janela")
     print("=" * 50)
     
     # Forçar primeiro redesenho
@@ -363,9 +359,8 @@ def main():
     print("=" * 50)
     print("SISTEMA DE MORPHING 3D INICIADO")
     print("Janelas 1 e 2 criadas")
-    print("Comandos:")
+    print("Comando:")
     print("  M - Abrir janela de morphing")
-    print("  R - Rotacionar objeto")
     print("=" * 50)
 
     try:
@@ -377,7 +372,7 @@ def main():
         pygame.mixer.music.play(-1) 
         pygame.mixer.music.pause()
         
-        print("Música carregada com sucesso!")
+        #print("Música carregada com sucesso!")
         
     except Exception as e:
         print(f"Não foi possível carregar a música: {e}")

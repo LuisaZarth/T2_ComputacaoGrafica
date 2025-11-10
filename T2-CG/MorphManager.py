@@ -1,4 +1,4 @@
-# MorphManager.py - VERSÃO MELHORADA (SEM DESAPARECIMENTO)
+
 import math
 import numpy as np
 from Ponto import Ponto
@@ -26,7 +26,7 @@ class MorphManager:
         self.objeto1 = obj1
         self.objeto2 = obj2
         print("\n=== INICIANDO CONFIGURAÇÃO DE MORPHING ===")
-        print("Normalizando objetos...")
+        #print("Normalizando objetos...")
         self.normalizarObjetos()
         
         self._vertices_array_obj1 = self._vertices_para_array(self.objeto1)
@@ -34,7 +34,7 @@ class MorphManager:
         
         print("Criando mapeamento bidirecional...")
         self.criarMapeamentoBidirecional()
-        print("Inicializando objeto de morphing...")
+        #print("Inicializando objeto de morphing...")
         self.inicializarObjetoMorph()
         print("=== CONFIGURAÇÃO COMPLETA ===\n")
     
@@ -46,10 +46,10 @@ class MorphManager:
         """Normaliza a escala e centraliza os objetos"""
         if self.objeto1:
             self.normalizarObjeto(self.objeto1)
-            print(f"  Obj1 normalizado: {len(self.objeto1.vertices)} vértices")
+            #print(f"  Obj1: {len(self.objeto1.vertices)} vértices")
         if self.objeto2:
             self.normalizarObjeto(self.objeto2)
-            print(f"  Obj2 normalizado: {len(self.objeto2.vertices)} vértices")
+            #print(f"  Obj2: {len(self.objeto2.vertices)} vértices")
         
     def normalizarObjeto(self, obj: Objeto3D):
         """Normaliza usando numpy para melhor performance"""
@@ -100,7 +100,7 @@ class MorphManager:
             vizinhos = self.encontrarKVizinhosProximos(v2, self._vertices_array_obj1, k=5)
             self.mapa_vertices_2_para_1[i] = vizinhos
         
-        print(f"  Mapeamento bidirecional criado")
+        #print(f"  Mapeamento bidirecional criado")
                     
     def inicializarObjetoMorph(self):
         """Inicializa o objeto de morphing com o número máximo de vértices"""
@@ -271,7 +271,7 @@ class MorphManager:
             self.frame_atual = self.total_frames
             self.executando = False
             self.atualizarMorph(1.0)
-            print(">>> Morphing COMPLETO (100%)")
+            #print(">>> Morphing COMPLETO (100%)")
             return False
             
         progresso = self.frame_atual / self.total_frames
@@ -284,7 +284,7 @@ class MorphManager:
         self.frame_atual = 0
         self._cache_pesos.clear()
         self.inicializarObjetoMorph()
-        print("\n>>> Morphing INICIADO (0%)")
+        #print("\n>>> Morphing INICIADO (0%)")
         
     def pararMorphing(self):
         """Para a animação de morphing"""
