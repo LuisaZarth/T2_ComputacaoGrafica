@@ -1,4 +1,4 @@
-# MorphManager.py - VERSÃO OTIMIZADA
+# MorphManager.py - VERSÃO MELHORADA (SEM DESAPARECIMENTO)
 import math
 import numpy as np
 from Ponto import Ponto
@@ -29,7 +29,6 @@ class MorphManager:
         print("Normalizando objetos...")
         self.normalizarObjetos()
         
-        # Converter para numpy arrays uma vez
         self._vertices_array_obj1 = self._vertices_para_array(self.objeto1)
         self._vertices_array_obj2 = self._vertices_para_array(self.objeto2)
         
@@ -57,25 +56,19 @@ class MorphManager:
         if not obj.vertices:
             return
         
-        # Converter para array numpy
         coords = np.array([[v.x, v.y, v.z] for v in obj.vertices])
         
-        # Calcular min, max e centro em uma operação
         min_coords = coords.min(axis=0)
         max_coords = coords.max(axis=0)
         centro = (min_coords + max_coords) / 2
         
-        # Calcular escala
         escala = (max_coords - min_coords).max()
         if escala == 0:
             escala = 1.0
         
         fator_escala = 2.0 / escala
-        
-        # Normalizar todos os vértices de uma vez
         coords_norm = (coords - centro) * fator_escala
         
-        # Atualizar vértices
         for i, vertice in enumerate(obj.vertices):
             vertice.x, vertice.y, vertice.z = coords_norm[i]
     
@@ -88,9 +81,7 @@ class MorphManager:
     def encontrarKVizinhosProximos(self, vertice: Ponto, array_vertices, k=3):
         """Versão vetorizada usando numpy - MUITO mais rápida"""
         distancias = self.distanciaEntrePontosVetorizada(vertice, array_vertices)
-        # np.argpartition é mais rápido que sort completo para encontrar k menores
         indices_k_menores = np.argpartition(distancias, min(k, len(distancias)-1))[:k]
-        # Ordenar apenas os k selecionados
         indices_ordenados = indices_k_menores[np.argsort(distancias[indices_k_menores])]
         return [(int(idx), float(distancias[idx])) for idx in indices_ordenados]
         
@@ -112,16 +103,34 @@ class MorphManager:
         print(f"  Mapeamento bidirecional criado")
                     
     def inicializarObjetoMorph(self):
-        """Inicializa o objeto de morphing"""
+        """Inicializa o objeto de morphing com o número máximo de vértices"""
         if not self.objeto1 or not self.objeto2:
             return
         
         self.objetoMorph = Objeto3D()
         
-        # Copiar vértices do objeto1
-        self.objetoMorph.vertices = [Ponto(v.x, v.y, v.z) for v in self.objeto1.vertices]
+        num_v1 = len(self.objeto1.vertices)
+        num_v2 = len(self.objeto2.vertices)
+        max_vertices = max(num_v1, num_v2)
         
-        # Copiar faces do objeto1
+        # Criar vértices suficientes desde o início
+        for i in range(max_vertices):
+            if i < num_v1:
+                v = self.objeto1.vertices[i]
+                self.objetoMorph.vertices.append(Ponto(v.x, v.y, v.z))
+            else:
+                # Interpolar posição inicial para vértices extras
+                if i in self.mapa_vertices_2_para_1:
+                    v_inter = self.interpolarComPesos(
+                        self.mapa_vertices_2_para_1[i],
+                        self._vertices_array_obj1
+                    )
+                    self.objetoMorph.vertices.append(Ponto(v_inter.x, v_inter.y, v_inter.z))
+                else:
+                    centro = self.calcularCentroide(self.objeto1)
+                    self.objetoMorph.vertices.append(Ponto(centro.x, centro.y, centro.z))
+        
+        # Começar com faces do objeto1
         self.objetoMorph.faces = [list(face) for face in self.objeto1.faces]
         
         self.objetoMorph.position = Ponto(0, 0, 0)
@@ -134,13 +143,11 @@ class MorphManager:
         if not vizinhos:
             return Ponto(0, 0, 0)
         
-        # Criar chave para cache
         cache_key = tuple((idx, dist) for idx, dist in vizinhos)
         
         if cache_key in self._cache_pesos:
             pesos = self._cache_pesos[cache_key]
         else:
-            # Calcular pesos
             pesos = []
             for idx, dist in vizinhos:
                 peso = 1000000 if dist < 0.0001 else 1.0 / (dist * dist)
@@ -150,7 +157,6 @@ class MorphManager:
             pesos = [(idx, p/soma_pesos) for idx, p in pesos]
             self._cache_pesos[cache_key] = pesos
         
-        # Calcular posição interpolada usando numpy
         posicao = np.zeros(3)
         for idx, peso in pesos:
             if idx < len(array_vertices):
@@ -159,155 +165,91 @@ class MorphManager:
         return Ponto(posicao[0], posicao[1], posicao[2])
         
     def atualizarMorph(self, progresso: float):
-        """Versão otimizada da atualização de morphing"""
+        """Versão melhorada - transição suave sem desaparecimento"""
         if not self.objetoMorph or not self.objeto1 or not self.objeto2:
             return
         
-        # Ease in-out cúbico
+        # Ease in-out suave
         t = progresso * progresso * (3.0 - 2.0 * progresso)
         
         num_v1 = len(self.objeto1.vertices)
         num_v2 = len(self.objeto2.vertices)
         
-        # CASO 1: CONTRAÇÃO (obj1 > obj2)
-        if num_v1 > num_v2:
-            if progresso <= 0.5:
-                fase = progresso * 2
-                fase_suave = fase * fase * (3.0 - 2.0 * fase)
-                
-                # Processar vértices em lote
-                for i in range(min(num_v1, len(self.objetoMorph.vertices))):
-                    v1 = self.objeto1.vertices[i]
-                    
-                    if i < num_v2:
-                        if i in self.mapa_vertices_1_para_2:
-                            v2_interpolado = self.interpolarComPesos(
-                                self.mapa_vertices_1_para_2[i], 
-                                self._vertices_array_obj2
-                            )
-                        else:
-                            v2_interpolado = self.objeto2.vertices[i]
-                    else:
-                        if i in self.mapa_vertices_1_para_2:
-                            v2_interpolado = self.interpolarComPesos(
-                                self.mapa_vertices_1_para_2[i],
-                                self._vertices_array_obj2
-                            )
-                        else:
-                            v2_interpolado = self.calcularCentroide(self.objeto2)
-                    
-                    v_morph = self.objetoMorph.vertices[i]
-                    v_morph.x = v1.x + (v2_interpolado.x - v1.x) * fase_suave
-                    v_morph.y = v1.y + (v2_interpolado.y - v1.y) * fase_suave
-                    v_morph.z = v1.z + (v2_interpolado.z - v1.z) * fase_suave
-                
-                if fase_suave > 0.3:
-                    proporcao_remover = (fase_suave - 0.3) / 0.7
-                    num_faces_manter = int(len(self.objeto1.faces) * (1 - proporcao_remover * 0.5))
-                    self.objetoMorph.faces = [list(f) for f in self.objeto1.faces[:num_faces_manter]]
+        # Interpolar TODOS os vértices suavemente
+        for i in range(len(self.objetoMorph.vertices)):
+            v_morph = self.objetoMorph.vertices[i]
             
-            else:  # Fase 2
-                fase = (progresso - 0.5) * 2
-                fase_suave = fase * fase * (3.0 - 2.0 * fase)
-                
-                for i in range(min(num_v2, len(self.objetoMorph.vertices))):
-                    if i in self.mapa_vertices_1_para_2:
-                        v_meio = self.interpolarComPesos(
-                            self.mapa_vertices_1_para_2[i],
-                            self._vertices_array_obj2
-                        )
-                    else:
-                        v_meio = self.objeto2.vertices[i] if i < num_v2 else self.objetoMorph.vertices[i]
-                    
-                    v2 = self.objeto2.vertices[i]
-                    v_morph = self.objetoMorph.vertices[i]
-                    v_morph.x = v_meio.x + (v2.x - v_meio.x) * fase_suave
-                    v_morph.y = v_meio.y + (v2.y - v_meio.y) * fase_suave
-                    v_morph.z = v_meio.z + (v2.z - v_meio.z) * fase_suave
-                
-                if fase_suave > 0.5:
-                    proporcao_obj2 = (fase_suave - 0.5) / 0.5
-                    num_faces_obj2 = int(len(self.objeto2.faces) * proporcao_obj2)
-                    
-                    self.objetoMorph.faces = []
-                    for face in self.objeto2.faces[:num_faces_obj2]:
-                        face_ajustada = [idx for idx in face if idx < len(self.objetoMorph.vertices)]
-                        if len(face_ajustada) >= 3:
-                            self.objetoMorph.faces.append(face_ajustada)
+            # Determinar posição inicial (objeto1)
+            if i < num_v1:
+                v_start = self.objeto1.vertices[i]
+                pos_start = np.array([v_start.x, v_start.y, v_start.z])
+            else:
+                # Vértice extra: usar interpolação do objeto1
+                if i in self.mapa_vertices_2_para_1:
+                    v_start = self.interpolarComPesos(
+                        self.mapa_vertices_2_para_1[i],
+                        self._vertices_array_obj1
+                    )
+                    pos_start = np.array([v_start.x, v_start.y, v_start.z])
+                else:
+                    centro = self.calcularCentroide(self.objeto1)
+                    pos_start = np.array([centro.x, centro.y, centro.z])
+            
+            # Determinar posição final (objeto2)
+            if i < num_v2:
+                v_end = self.objeto2.vertices[i]
+                pos_end = np.array([v_end.x, v_end.y, v_end.z])
+            else:
+                # Vértice extra: usar interpolação do objeto2
+                if i in self.mapa_vertices_1_para_2:
+                    v_end = self.interpolarComPesos(
+                        self.mapa_vertices_1_para_2[i],
+                        self._vertices_array_obj2
+                    )
+                    pos_end = np.array([v_end.x, v_end.y, v_end.z])
+                else:
+                    centro = self.calcularCentroide(self.objeto2)
+                    pos_end = np.array([centro.x, centro.y, centro.z])
+            
+            # Interpolação linear suave
+            pos_atual = pos_start + (pos_end - pos_start) * t
+            v_morph.x, v_morph.y, v_morph.z = pos_atual[0], pos_atual[1], pos_atual[2]
         
-        # CASO 2: EXPANSÃO (obj1 <= obj2)
-        else:
-            if progresso <= 0.5:
-                fase = progresso * 2
-                fase_suave = fase * fase * (3.0 - 2.0 * fase)
-                
-                for i in range(len(self.objetoMorph.vertices)):
-                    if i >= num_v1:
-                        continue
-                    
-                    v1 = self.objeto1.vertices[i]
-                    
-                    if i in self.mapa_vertices_1_para_2:
-                        v2_interpolado = self.interpolarComPesos(
-                            self.mapa_vertices_1_para_2[i],
-                            self._vertices_array_obj2
-                        )
-                        
-                        v_morph = self.objetoMorph.vertices[i]
-                        v_morph.x = v1.x + (v2_interpolado.x - v1.x) * fase_suave
-                        v_morph.y = v1.y + (v2_interpolado.y - v1.y) * fase_suave
-                        v_morph.z = v1.z + (v2_interpolado.z - v1.z) * fase_suave
+        # Transição GRADUAL de faces
+        self.atualizarFaces(progresso, num_v1, num_v2)
+    
+    def atualizarFaces(self, progresso, num_v1, num_v2):
+        """Transição suave de faces mantendo o objeto visível"""
+        # Ponto de transição mais tardio para evitar desaparecimento
+        if progresso < 0.7:
+            # Manter faces do objeto1 por mais tempo
+            self.objetoMorph.faces = [list(face) for face in self.objeto1.faces]
+        elif progresso < 0.9:
+            # Transição gradual (70% - 90%)
+            fase = (progresso - 0.7) / 0.2
             
-            else:  # Fase 2
-                fase = (progresso - 0.5) * 2
-                fase_suave = fase * fase * (3.0 - 2.0 * fase)
-                
-                # Adicionar vértices extras
-                while len(self.objetoMorph.vertices) < num_v2:
-                    idx = len(self.objetoMorph.vertices)
-                    if idx in self.mapa_vertices_2_para_1:
-                        v_inter = self.interpolarComPesos(
-                            self.mapa_vertices_2_para_1[idx],
-                            self._vertices_array_obj1
-                        )
-                        self.objetoMorph.vertices.append(Ponto(v_inter.x, v_inter.y, v_inter.z))
-                    elif idx < num_v2:
-                        v2 = self.objeto2.vertices[idx]
-                        self.objetoMorph.vertices.append(Ponto(v2.x, v2.y, v2.z))
-                
-                # Interpolar todos os vértices
-                for i in range(min(len(self.objetoMorph.vertices), num_v2)):
-                    v_morph = self.objetoMorph.vertices[i]
-                    v2 = self.objeto2.vertices[i]
-                    
-                    if i < num_v1:
-                        v1 = self.objeto1.vertices[i]
-                        if i in self.mapa_vertices_1_para_2:
-                            v_inicial = self.interpolarComPesos(
-                                self.mapa_vertices_1_para_2[i],
-                                self._vertices_array_obj2
-                            )
-                        else:
-                            v_inicial = v1
-                    else:
-                        v_inicial = v_morph
-                    
-                    v_morph.x = v_inicial.x + (v2.x - v_inicial.x) * fase_suave
-                    v_morph.y = v_inicial.y + (v2.y - v_inicial.y) * fase_suave
-                    v_morph.z = v_inicial.z + (v2.z - v_inicial.z) * fase_suave
-                
-                # Transição de faces
-                if fase_suave > 0.7:
-                    proporcao_obj2 = (fase_suave - 0.7) / 0.3
-                    num_faces_obj2 = int(len(self.objeto2.faces) * proporcao_obj2)
-                    
-                    self.objetoMorph.faces = []
-                    for face in self.objeto1.faces[:len(self.objeto1.faces) - num_faces_obj2]:
-                        self.objetoMorph.faces.append(list(face))
-                    for face in self.objeto2.faces[:num_faces_obj2]:
-                        face_ajustada = [idx for idx in face if idx < len(self.objetoMorph.vertices)]
-                        if len(face_ajustada) >= 3:
-                            self.objetoMorph.faces.append(face_ajustada)
+            # Misturar faces dos dois objetos
+            num_faces_obj1 = int(len(self.objeto1.faces) * (1 - fase))
+            num_faces_obj2 = int(len(self.objeto2.faces) * fase)
+            
+            self.objetoMorph.faces = []
+            
+            # Adicionar faces do objeto1
+            for face in self.objeto1.faces[:num_faces_obj1]:
+                self.objetoMorph.faces.append(list(face))
+            
+            # Adicionar faces do objeto2
+            for face in self.objeto2.faces[:num_faces_obj2]:
+                face_ajustada = [idx for idx in face if idx < len(self.objetoMorph.vertices)]
+                if len(face_ajustada) >= 3:
+                    self.objetoMorph.faces.append(face_ajustada)
+        else:
+            # Final: usar apenas faces do objeto2
+            self.objetoMorph.faces = []
+            for face in self.objeto2.faces:
+                face_ajustada = [idx for idx in face if idx < len(self.objetoMorph.vertices)]
+                if len(face_ajustada) >= 3:
+                    self.objetoMorph.faces.append(face_ajustada)
     
     def calcularCentroide(self, obj: Objeto3D):
         """Versão otimizada usando numpy"""
@@ -340,7 +282,7 @@ class MorphManager:
         """Inicia a animação de morphing DO INÍCIO"""
         self.executando = True
         self.frame_atual = 0
-        self._cache_pesos.clear()  # Limpar cache
+        self._cache_pesos.clear()
         self.inicializarObjetoMorph()
         print("\n>>> Morphing INICIADO (0%)")
         
