@@ -36,17 +36,20 @@ def carregaObjetos():
     
     try:
         objeto1 = Objeto3D()
-        if not objeto1.LoadFile('hard3.obj'):
+        if not objeto1.LoadFile('hard1.obj'):
             print("ERRO: Não foi possível carregar o objeto hard1.obj")
             return False
         
         objeto2 = Objeto3D()
-        if not objeto2.LoadFile('hard1.obj'):
+        if not objeto2.LoadFile('hard3.obj'):
             print("ERRO: Não foi possível carregar o objeto hard3.obj")
             return False
         
         # Configurar morph manager
         morph_manager.setObjetos(objeto1, objeto2)
+
+        objeto1 = morph_manager.objeto1  
+        objeto2 = morph_manager.objeto2
         
         print("\n=== VERIFICAÇÃO DE INICIALIZAÇÃO ===")
         print(f"Objeto1: {len(objeto1.vertices)} vértices, {len(objeto1.faces)} faces")
@@ -92,7 +95,7 @@ def PosicUser():
     gluPerspective(60, 1.0, 0.01, 50)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
-    gluLookAt(-2, 6, -8, 0, 0, 0, 0, 1.0, 0)
+    gluLookAt(-3, 5, -8, 0, 0, 0, 0, 1.0, 0)
 
 def DesenhaLadrilho():
     """Desenha um ladrilho do piso"""
