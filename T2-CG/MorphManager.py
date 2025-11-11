@@ -3,11 +3,11 @@ from Objeto3D import Objeto3D
 from Ponto import Ponto
 
 class MorphManager:
-    def __init__(self, total_frames=120):
+    def __init__(self):
         self.objeto1 = None
         self.objeto2 = None
         self.objetoMorph = None
-        self.total_frames = total_frames
+        self.total_frames = 120
         self.frame_atual = 0
         self.executando = False
         
