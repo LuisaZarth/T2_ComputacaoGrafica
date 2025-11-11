@@ -27,16 +27,16 @@ class MorphManager:
         # Criar objeto de morphing
         self.objetoMorph = self.criarObjetoMorphInicial()
         
-        print(f"\n=== MAPEAMENTO DE MORPHING ===")
+        '''print(f"\n=== MAPEAMENTO DE MORPHING ===")
         print(f"Objeto 1: {len(self.objeto1.vertices)} vértices, {len(self.objeto1.faces)} faces")
         print(f"Objeto 2: {len(self.objeto2.vertices)} vértices, {len(self.objeto2.faces)} faces")
         print(f"Faces mapeadas: {len(self.mapa_faces)}")
         print(f"Faces desaparecendo: {len(self.vertices_extra_obj1)}")
         print(f"Faces aparecendo: {len(self.vertices_extra_obj2)}")
         print("==============================\n")
-        
+        '''
         # Debug detalhado
-        self.debugMapeamento()
+        #self.debugMapeamento()
 
     def normalizarObjeto(self, obj):
         """Normaliza e centraliza o objeto no bounding box"""
@@ -71,7 +71,7 @@ class MorphManager:
         obj_normalizado.rotation = obj.rotation
         
         # Normalizar vértices
-        scale = 2.0 / max_size
+        scale = 2.5 / max_size
         for v in obj.vertices:
             v_normalizado = Ponto(
                 (v.x - center_x) * scale,
@@ -373,7 +373,7 @@ class MorphManager:
                 if len(nova_face) >= 3:
                     self.objetoMorph.faces.append(nova_face)
 
-    def debugMapeamento(self):
+    '''def debugMapeamento(self):
         """Debug detalhado do mapeamento"""
         print("\n=== DEBUG MAPEAMENTO ===")
         print("Faces mapeadas 1:1:")
@@ -390,15 +390,15 @@ class MorphManager:
         for i, extra in enumerate(self.vertices_extra_obj2):
             print(f"  {i}: Centroide face {extra['face_origem']} -> Face {extra['face_destino']}")
         print("=======================\n")
-
+    '''
     def iniciarMorphing(self):
         """Inicia a animação de morphing"""
         self.executando = True
         self.frame_atual = 0
-        print(f"Morphing iniciado: {self.total_frames} frames")
-        print(f"Estratégia: {len(self.vertices_extra_obj1)} faces desaparecem, "
+        print(f"Morphing iniciado")
+        '''print(f"Estratégia: {len(self.vertices_extra_obj1)} faces desaparecem, "
               f"{len(self.vertices_extra_obj2)} faces aparecem")
-
+    '''
     def pararMorphing(self):
         """Para a animação de morphing"""
         self.executando = False
@@ -420,11 +420,11 @@ class MorphManager:
         self.atualizarMorph()
         
         # Debug a cada 10 frames
-        if self.frame_atual % 10 == 0:
+        ''' if self.frame_atual % 10 == 0:
             t = self.frame_atual / float(self.total_frames)
             print(f"Frame {self.frame_atual}/{self.total_frames} (t={t:.2f}) - "
                   f"{len(self.objetoMorph.vertices)} vértices, {len(self.objetoMorph.faces)} faces")
-        
+        '''
         return True
 
     def reiniciar(self):
