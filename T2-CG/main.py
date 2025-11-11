@@ -47,6 +47,9 @@ def carregaObjetos():
         
         # Configurar morph manager
         morph_manager.setObjetos(objeto1, objeto2)
+
+        objeto1 = morph_manager.objeto1
+        objeto2 = morph_manager.objeto2
         
         return True
         
