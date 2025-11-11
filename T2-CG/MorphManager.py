@@ -263,7 +263,7 @@ class MorphManager:
 
     def suavizarInterpolacao(self, t):
         """Suaviza a interpolação para movimento mais natural"""
-        return t * t * (3 - 2 * t)  # Smoothstep function
+        return t * t * (3 - 2 * t) 
 
     def atualizarMorph(self):
         """Atualiza o objeto de morphing com estratégia robusta"""
@@ -314,12 +314,12 @@ class MorphManager:
             # Faces extras do obj1 desaparecem nos primeiros 80% da animação
             if t < 0.8:
                 fade_t = 1.0 - (t / 0.8)  # Vai de 1 a 0
-                
+            
                 nova_face = []
                 for i, v_orig in enumerate(extra['vertices_origem']):
-                    v_interpolado = self.interpolaPonto(
+                    v_interpolado = self.interpolaPonto( 
+                        extra['centroide_destino'],
                         v_orig, 
-                        extra['centroide_destino'], 
                         fade_t
                     )
                     self.objetoMorph.vertices.append(v_interpolado)

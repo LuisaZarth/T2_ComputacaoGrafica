@@ -36,12 +36,12 @@ def carregaObjetos():
     
     try:
         objeto1 = Objeto3D()
-        if not objeto1.LoadFile('hard3.obj'):
+        if not objeto1.LoadFile('hard1.obj'):
             print("ERRO: Não foi possível carregar o objeto1")
             return False
 
         objeto2 = Objeto3D()  
-        if not objeto2.LoadFile('hard1.obj'):
+        if not objeto2.LoadFile('hard3.obj'):
             print("ERRO: Não foi possível carregar o objeto2") 
             return False
         
@@ -341,7 +341,7 @@ def main():
     try:
         pygame.mixer.init()
         pygame.mixer.music.load('beatles.mp3')
-        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.set_volume(1.0)
         pygame.mixer.music.play(-1) 
         pygame.mixer.music.pause()
         
