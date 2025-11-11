@@ -91,7 +91,7 @@ class Ponto:
 '''Ela calcula o determinante, para verificar se as retas são paralelas, 
 se det =! 0, calcula os parâmetros s e t e eles indicam onde nas retas 
 ocorre a interseção'''
-def intersec2d(k: Ponto, l: Ponto, m: Ponto, n: Ponto) -> (int, float, float):
+def intersec2d(k: Ponto, l: Ponto, m: Ponto, n: Ponto) -> (int, float, float): # type: ignore
     det = (n.x - m.x) * (l.y - k.y)  -  (n.y - m.y) * (l.x - k.x)
 
     if (det == 0.0):

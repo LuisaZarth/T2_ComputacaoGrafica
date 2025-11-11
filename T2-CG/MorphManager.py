@@ -27,16 +27,9 @@ class MorphManager:
         # Criar objeto de morphing
         self.objetoMorph = self.criarObjetoMorphInicial()
         
-        print(f"\n=== MAPEAMENTO DE MORPHING ===")
+        print(f"\n===== MAPEAMENTO DE MORPHING =====")
         print(f"Objeto 1: {len(self.objeto1.vertices)} vértices, {len(self.objeto1.faces)} faces")
-        print(f"Objeto 2: {len(self.objeto2.vertices)} vértices, {len(self.objeto2.faces)} faces")
-        print(f"Faces mapeadas: {len(self.mapa_faces)}")
-        print(f"Faces desaparecendo: {len(self.vertices_extra_obj1)}")
-        print(f"Faces aparecendo: {len(self.vertices_extra_obj2)}")
-        print("==============================\n")
-        
-        # Debug detalhado
-        self.debugMapeamento()
+        print(f"Objeto 2: {len(self.objeto2.vertices)} vértices, {len(self.objeto2.faces)} faces")        
 
     def normalizarObjeto(self, obj):
         """Normaliza e centraliza o objeto no bounding box"""
@@ -52,11 +45,11 @@ class MorphManager:
         max_z = max(v.z for v in obj.vertices)
         
         # Calcular centro e tamanho
-        center_x = (min_x + max_x) / 2.0
+        center_x = (min_x + max_x) / 2.0 #para centralizar na origem
         center_y = (min_y + max_y) / 2.0
         center_z = (min_z + max_z) / 2.0
         
-        size_x = max_x - min_x
+        size_x = max_x - min_x #para redimensionar proporcionalmente
         size_y = max_y - min_y
         size_z = max_z - min_z
         max_size = max(size_x, size_y, size_z)
@@ -82,23 +75,6 @@ class MorphManager:
         
         return obj_normalizado
 
-    def copiarObjeto(self, obj):
-        """Cria uma cópia profunda do objeto"""
-        novo = Objeto3D()
-        
-        # Copiar vértices
-        for v in obj.vertices:
-            novo.vertices.append(Ponto(v.x, v.y, v.z))
-        
-        # Copiar faces
-        for face in obj.faces:
-            novo.faces.append(face[:])
-        
-        novo.position = Ponto(obj.position.x, obj.position.y, obj.position.z)
-        novo.rotation = obj.rotation
-        
-        return novo
-
     def distancia(self, p1, p2):
         """Calcula distância euclidiana entre dois pontos"""
         dx = p1.x - p2.x
@@ -119,7 +95,7 @@ class MorphManager:
 
     def criarMapeamentoFacesRobusto(self):
         """
-        Estratégia robusta para mapeamento de faces com números diferentes
+        Estratégia para mapeamento de faces com números diferentes
         """
         num_faces1 = len(self.objeto1.faces)
         num_faces2 = len(self.objeto2.faces)
@@ -373,31 +349,11 @@ class MorphManager:
                 if len(nova_face) >= 3:
                     self.objetoMorph.faces.append(nova_face)
 
-    def debugMapeamento(self):
-        """Debug detalhado do mapeamento"""
-        print("\n=== DEBUG MAPEAMENTO ===")
-        print("Faces mapeadas 1:1:")
-        for i, (idx1, idx2) in enumerate(self.mapa_faces):
-            face1 = self.objeto1.faces[idx1]
-            face2 = self.objeto2.faces[idx2]
-            print(f"  {i}: Obj1[{idx1}]({len(face1)}v) -> Obj2[{idx2}]({len(face2)}v)")
-        
-        print("\nFaces desaparecendo:")
-        for i, extra in enumerate(self.vertices_extra_obj1):
-            print(f"  {i}: Face {extra['face_origem']} -> Centroide face {extra['face_destino']}")
-        
-        print("\nFaces aparecendo:")
-        for i, extra in enumerate(self.vertices_extra_obj2):
-            print(f"  {i}: Centroide face {extra['face_origem']} -> Face {extra['face_destino']}")
-        print("=======================\n")
 
     def iniciarMorphing(self):
         """Inicia a animação de morphing"""
         self.executando = True
         self.frame_atual = 0
-        print(f"Morphing iniciado: {self.total_frames} frames")
-        print(f"Estratégia: {len(self.vertices_extra_obj1)} faces desaparecem, "
-              f"{len(self.vertices_extra_obj2)} faces aparecem")
 
     def pararMorphing(self):
         """Para a animação de morphing"""
@@ -413,17 +369,10 @@ class MorphManager:
         if self.frame_atual > self.total_frames:
             self.executando = False
             self.frame_atual = self.total_frames
-            print("Morphing concluído!")
             return False
         
         # Atualizar o objeto de morphing
         self.atualizarMorph()
-        
-        # Debug a cada 10 frames
-        if self.frame_atual % 10 == 0:
-            t = self.frame_atual / float(self.total_frames)
-            print(f"Frame {self.frame_atual}/{self.total_frames} (t={t:.2f}) - "
-                  f"{len(self.objetoMorph.vertices)} vértices, {len(self.objetoMorph.faces)} faces")
         
         return True
 
